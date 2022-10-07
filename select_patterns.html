@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+</head>
+<body>
+<form action="#" method="post">
+    <select name="pattern" id="pattern">
+        <option value="">--手法選択--</option>
+    </select><br>
+    <select name="environment" id="environment">
+
+    </select><br>
+    <select name="scale" id="scale">
+        <option value="">--時間軸--</option>
+        <option value="15m">15m</option>
+        <option value="5m">5m</option>
+        <option value="1m">1m</option>
+        <option value="15s">15s</option>
+        <option value="5s">5s</option>
+    </select><br>
+    利益判定: <select name="result" id="result">
+    <option value="プラス">プラス</option>
+    <option value="なし">なし</option>
+    <option value="マイナス">マイナス</option>
+</select><br>
+    <input id='btn' type="button" name="btn" value="送信">
+</form>
+<div id='scale-text' style="hight: 100px; font-size: 20px;">
+    スケール
+</div>
+</body>
+<script>
+  $(() => {
+    google.script.run
+      .withSuccessHandler(res => {
+        let patternSel = $('#pattern');
+        console.log(res);
+        res.forEach(pattern => patternSel.append($('<option>').text(pattern['name']).val(pattern['id'])));
+      })
+      .withFailureHandler(event => console.log("error: " + event))
+      .getPatterns();
+
+    $('#environment').append($('<option>').text('--環境認識--').val(''));
+
+    $('#pattern').change(() => {
+      show_text($('#pattern').val(), $('#scale').val());
+      load_env($('#pattern').val());
+
+    });
+    $('#scale').change(() => {
+      show_text($('#pattern').val(), $('#scale').val());
+    });
+
+    function show_text(key, scale) {
+      google.script.run
+        .withSuccessHandler(res => {if(res != '') $('#scale-text').text(res)})
+        .withFailureHandler(event => console.log("error: " + event))
+        .getScaleText(key, scale);
+    }
+
+    function load_env(pattern) {
+      let envSel = $('#environment');
+      envSel.empty();
+      envSel.append($('<option>').text('--環境認識--').val(''))
+      google.script.run
+        .withSuccessHandler(res => {
+          let first = true;
+          res.push('なし');
+          res.push('ミス');
+          res.push('新規');
+          res.forEach(env => {
+
+            if(first) {
+              envSel.append($('<option>').text(env).val(env).prop('selected', true));
+              first = false;
+            } else {
+              envSel.append($('<option>').text(env).val(env));
+            }
+          })
+        })
+        .withFailureHandler(event => console.log("error: " + event))
+        .getEnvironments(pattern);
+    }
+  });
+
+
+  $('#btn').click( () => {
+    google.script.run
+      .withSuccessHandler(() => google.script.host.close())
+      .withFailureHandler(event => console.log("error: " + event))
+      .applyScaleText($('#pattern').val(), $('#environment').val(), $('#scale').val(), $('#result').val());
+  });
+
+</script>
+
+</html>
+
+

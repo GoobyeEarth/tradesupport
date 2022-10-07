@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+</head>
+<body>
+<form action="#" method="post">
+    <input type="text" name="contains">
+    <input type="button" name="btn" value="スライドを抽出する">
+</form>
+</body>
+<script>
+  document.addEventListener("DOMContentLoaded", event => {
+    const submit = document.querySelector("input[name=btn]");
+    submit.addEventListener("click", () => {
+      const contains = document.querySelector("input[name=contains]").value;
+      google.script.run
+        .withSuccessHandler(() => google.script.host.close())
+        .withFailureHandler(event => console.log("error: " + event))
+        .searchSlides(contains);
+    });
+  });
+</script>
+</html>
