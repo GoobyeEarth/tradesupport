@@ -17,7 +17,7 @@
       google.script.run
         .withSuccessHandler(() => google.script.host.close())
         .withFailureHandler(event => console.log("error: " + event))
-        .searchSlides(contains);
+        .callLibraryFunction('Tradesupport.searchSlides', [contains]);
     });
   });
 </script>

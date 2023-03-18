@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+</head>
+<body>
+<form action="#" method="post">
+    <select name="pattern" id="pattern">
+        <option value="">--手法選択2--</option>
+    </select><br>
+    利益判定: <select name="result" id="result">
+    <option value="プラス">プラス</option>
+    <option value="なし">なし</option>
+    <option value="マイナス">マイナス</option>
+</select><br>
+<textarea  name="supplement" id="supplement" style="min-height: 80px; min-width: 250px">
+</textarea><br>
+    <input id='btn' type="button" name="btn" value="送信">
+</form>
+</body>
+<script>
+  $(() => {
+    google.script.run
+      .withSuccessHandler(res => {
+        let patternSel = $('#pattern');
+        res.forEach(pattern => patternSel.append($('<option>').text(pattern['name']).val(pattern['id'])));
+      })
+      .withFailureHandler(event => console.log("error: " + event))
+      .callLibraryFunction('Tradesupport.getPatterns', ['低負荷型']);
+
+    google.script.run.withSuccessHandler(res => {
+        $('#supplement').val(res);
+      })
+      .withFailureHandler(event => console.log("error: " + event))
+      .callLibraryFunction('Tradesupport.getSupplement', []);
+
+  $('#btn').click( () => {
+    google.script.run
+      .withSuccessHandler(() => google.script.host.close())
+      .withFailureHandler(event => console.log("error: " + event))
+      .callLibraryFunction('Tradesupport.applyScaleText',
+        [$('#pattern').val(), '低負荷型', '', 0, '', $('#result').val(), $('#supplement').val()]);
+  });
+});
+
+</script>
+</html>
+
+

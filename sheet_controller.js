@@ -58,13 +58,15 @@ function readSlide() {
   const presentation = SlidesApp.openByUrl(input.getResponseText());
 
   const values = presentation.getSlides().slice(1).map(slide => {
-    const elements = slide.getPageElements();
-    const text = elements[8].asShape().getText().asString();
-
-    const comment = Comment.createFromText(text);
-    return comment.getRow(text);
+    try {
+      const allocation = new Allocation(slide);
+      const comment = Comment.createFromText(allocation.getCommentText());
+      return comment.getRow();
+    } catch(e) {
+      return ['', 'error', e, '', '', '', '', '',];
+    }
   });
 
-  const rangeText = 'A2:G' + (values.length + 1);
+  const rangeText = 'A2:H' + (values.length + 1);
   sheet.getRange(rangeText).setValues(values);
 }

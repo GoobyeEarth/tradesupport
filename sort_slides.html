@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+</head>
+<body>
+<form action="#" method="post">
+  <select name="type" id="type">
+    <option value="手法">手法</option>
+    <option value="損益">損益</option>
+    <option value="ページ番号">ページ番号</option>
+  </select>
+  <select name="sign" id="sign">
+    <option value="昇順">昇順</option>
+    <option value="降順">降順</option>
+  </select>
+      <input id='btn' type="button" name="btn" value="送信">
+  </form>
+</body>
+<script>
+  $('#btn').click( () => {
+    google.script.run
+      .withSuccessHandler(() => google.script.host.close())
+      .withFailureHandler(event => console.log("error: " + event))
+      .callLibraryFunction('Tradesupport.executeSorting', [$('#type').val(), $('#sign').val()]);
+  });
+</script>
+</html>

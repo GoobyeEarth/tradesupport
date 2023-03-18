@@ -10,8 +10,7 @@
         <option value="">--手法選択--</option>
     </select><br>
     <select name="environment" id="environment">
-
-    </select><br>
+    </select><input type="text" name="new_env" id="new-env" /><br>
     <select name="scale" id="scale">
         <option value="">--時間軸--</option>
         <option value="15m">15m</option>
@@ -25,6 +24,8 @@
     <option value="なし">なし</option>
     <option value="マイナス">マイナス</option>
 </select><br>
+<textarea  name="supplement" id="supplement" style="min-height: 80px; min-width: 250px">
+</textarea><br>
     <input id='btn' type="button" name="btn" value="送信">
 </form>
 <div id='scale-text' style="hight: 100px; font-size: 20px;">
@@ -36,13 +37,25 @@
     google.script.run
       .withSuccessHandler(res => {
         let patternSel = $('#pattern');
-        console.log(res);
         res.forEach(pattern => patternSel.append($('<option>').text(pattern['name']).val(pattern['id'])));
       })
       .withFailureHandler(event => console.log("error: " + event))
-      .getPatterns();
+      .callLibraryFunction('Tradesupport.getPatterns', ['トレンドの起点を下位足から']);
+
+    google.script.run.withSuccessHandler(res => {
+        $('#supplement').val(res);
+      })
+      .withFailureHandler(event => console.log("error: " + event))
+      .callLibraryFunction('Tradesupport.getSupplement', []);
 
     $('#environment').append($('<option>').text('--環境認識--').val(''));
+    $('#environment').change(() => {
+      if($('#environment').val() == '新規'){
+        $('#new-env').show();
+      } else {
+        $('#new-env').hide();
+      }
+    });
 
     $('#pattern').change(() => {
       show_text($('#pattern').val(), $('#scale').val());
@@ -57,7 +70,7 @@
       google.script.run
         .withSuccessHandler(res => {if(res != '') $('#scale-text').text(res)})
         .withFailureHandler(event => console.log("error: " + event))
-        .getScaleText(key, scale);
+        .callLibraryFunction('Tradesupport.getScaleText', [key, scale]);
     }
 
     function load_env(pattern) {
@@ -81,7 +94,7 @@
           })
         })
         .withFailureHandler(event => console.log("error: " + event))
-        .getEnvironments(pattern);
+        .callLibraryFunction('Tradesupport.getEnvironments', [pattern]);
     }
   });
 
@@ -90,11 +103,11 @@
     google.script.run
       .withSuccessHandler(() => google.script.host.close())
       .withFailureHandler(event => console.log("error: " + event))
-      .applyScaleText($('#pattern').val(), $('#environment').val(), $('#scale').val(), $('#result').val());
+      .callLibraryFunction('Tradesupport.applyScaleText',
+        [$('#pattern').val(), 'トレンドの起点を下位足から', $('#environment').val(), $('#new-env').val(), $('#scale').val(), $('#result').val(), $('#supplement').val()]);
   });
 
 </script>
-
 </html>
 
 
